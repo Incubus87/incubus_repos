@@ -1,0 +1,57 @@
+-- acessando com AWS Client
+
+Instalar AWS Client
+
+-- Iniciar um profile
+
+aws configure
+
+aws configure --profile your_profile_name
+set aws_key
+set aws_scecret_id
+
+-- listar profiles
+
+aws configure list-profiles
+
+-- exportar credenciais
+
+aws configure export-credentials
+
+--S3
+-- Comandos Básicos
+
+aws s3 ls
+aws s3 cp
+
+upload
+aws s3 cp stg_clientes.csv s3://your_bucket_name/dados
+aws s3 cp c:\users\oruto\downloads\stg_clientes.csv s3://your_bucket_name/bronze/stg_clientes.csv 
+
+Download Diretório
+aws s3 cp s3://your_bucket_name . --recursive
+Download Arquivo
+aws s3 cp s3://your_bucket_name/bronze/stg_clientes.csv c:\users\oruto\downloads\stg_clientes.csv
+Move files
+aws s3 mv s3://your_bucket_name/bronze/stg_clientes.csv s3://your_bucket_name/dados/stg_clientes_2.csv
+
+
+--EC2
+-- pega informações da instancia
+
+aws ec2 describe-instances --filters Name=tag:srv_name,Values=srv-incubus 
+aws ec2 describe-instances --instance-ids 
+aws ec2 describe-instance-status --instance-ids  --profile srv_user_incb 
+
+
+aws ec2 stop-instances --instance-ids 
+aws ec2 start-instances --instance-ids 
+
+aws ec2 describe-instances --instance-ids  --query 'Reservations[*].Instances[*].PublicIpAddress' --output text
+aws ec2 describe-instances --filters Name=tag:srv_name,Values=srv-incubus --query 'Reservations[*]'
+aws ec2 describe-instances --filters Name=tag:srv_name,Values=srv-incubus --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text
+aws ec2 describe-instances --profile srv_user_incb --filters Name=tag:srv_name,Values=srv-incubus --query 'Reservations[*].Instances[*].PublicIpAddress' --output text
+
+Referencias: https://docs.aws.amazon.com/cli/latest/reference/s3/
+https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-filter.html
+https://boto3.amazonaws.com/v1/documentation/api/1.9.42/reference/services/ec2.html#EC2.Client.describe_instances
