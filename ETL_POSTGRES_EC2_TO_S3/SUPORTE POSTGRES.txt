@@ -1,0 +1,87 @@
+-- Instalando Postgres
+
+apt-get purge postgresql
+apt-get purge remove postgresql
+apt-get install postgresql
+
+-- check installed versions
+
+dpkg -l | grep postgres
+
+-- Check services
+
+sudo systemctl status postgresql
+sudo systemctl start postgresql
+sudo systemctl stop postgresql
+
+-- check clusters
+
+pg_lsclusters
+sudo systemctl start postgresql@9.5-main.service
+
+First, I deleted config and database
+
+$ sudo pg_dropcluster --stop 9.1 main
+Then removed postgresql
+
+$ sudo apt-get remove --purge postgresql postgresql-9.1 
+and then reinstalled
+
+$ sudo apt-get install postgresql postgresql-9.1
+In my case I noticed /etc/postgresql/9.1 was empty, and running service postgresql start returned nothing
+
+So, after more googling I got to this command:
+
+$ sudo pg_createcluster 9.1 main
+With that I could start the server, but now I was getting log-related errors. After more searching, I ended up changing permissions to the /var/log/postgresql directory
+
+$ sudo chown root.postgres /var/log/postgresql
+$ sudo chmod g+wx /var/log/postgresql
+
+
+-- Configurations for Postgres
+
+sudo -u postgres psql -c "SHOW config_file;" 
+
+-- abrir arquivo de configuração da versão correspondente
+
+sudo nano /etc/postgresql/13/main/postgresql.conf 
+
+-- adicionar a liberação para todos os ips
+
+#listen_addresses = 'localhost'
+listen_addresses = '*'
+
+-- abrir o arquivo hba e adicionar liberação para todas as portas
+
+sudo nano /etc/postgresql/1/main/pg_hba.conf 
+
+# TYPE  DATABASE	USER	ADDRESS   	METHOD
+host    all     	all     0.0.0.0/0       md5
+host    all             all     :/0             md5
+
+
+-- criando usuario
+
+CREATE USER your_new_username;
+GRANT SELECT ON DATABASE your_database_name to your_new_username;
+
+-- permitir acesso ao postgres com outros usuários
+-- substituir de pper para md5 no pg_hba.conf
+
+# Database administrative login by Unix domain socket
+local   all             postgres                                peer
+local   all             your_new_username                       md5
+
+
+-- restartar serviço
+
+sudo systemctl restart postgresql 
+
+-- liberar porta dos postgres
+
+sudo ufw allow 5432 
+
+
+-- fonte: https://tecadmin.net/postgresql-allow-remote-connections/
+
